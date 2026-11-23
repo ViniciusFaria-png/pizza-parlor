@@ -3,11 +3,18 @@
 import { formatarPreco } from './util/formataPreco.js'
 import { obterStatusEstoque } from './util/estoque.js'
 import { configurarImagem } from './util/image.js'
+import { normalizarTexto } from './util/normalizarTexto.js'
 
 const tabVitrine = document.getElementById('tab-vitrine');
 const tabAdmin = document.getElementById('tab-admin');
 const secVitrine = document.getElementById('sec-vitrine');
 const secAdmin = document.getElementById('sec-admin');
+
+const filtroVitrine = document.getElementById('filtro-vitrine');
+const buscaPizza = document.getElementById('busca-pizza');
+const filtroCategoria = document.getElementById('filtro-categoria');
+const filtroEstoque = document.getElementById('filtro-estoque');
+const btnLimparFiltros = document.getElementById('btn-limpar-filtros');
 
 const vitrineContainer = document.getElementById('vitrine-container');
 
@@ -130,12 +137,44 @@ const renderizarVitrine = (pizzas) => {
     vitrineContainer.replaceChildren(...cards);
 };
 
+const filtrarVitrine = () => {
+    const termo = normalizarTexto(buscaPizza.value);
+    const categoriaSelecionada = filtroCategoria.value;
+    const estoqueSelecionado = filtroEstoque.value;
+
+    const filtradas = listaPizzas.filter((pizza) => {
+        const bateuTexto =
+            termo === '' ||
+            normalizarTexto(pizza.nome).includes(termo) ||
+            normalizarTexto(pizza.ingredientes).includes(termo) ||
+            normalizarTexto(pizza.categoria).includes(termo);
+
+        const bateuCategoria =
+            categoriaSelecionada === '' || pizza.categoria === categoriaSelecionada;
+
+        const bateuEstoque =
+            estoqueSelecionado === '' ||
+            obterStatusEstoque(pizza.estoque).tipo === estoqueSelecionado;
+
+        return bateuTexto && bateuCategoria && bateuEstoque;
+    });
+
+    renderizarVitrine(filtradas);
+};
+
+const limparFiltros = () => {
+    buscaPizza.value = '';
+    filtroCategoria.value = '';
+    filtroEstoque.value = '';
+    filtrarVitrine();
+};
+
 const carregarPizzas = async () => {
     vitrineContainer.innerHTML = '<p class="loading">Carregando cardápio de pizzas...</p>';
     try {
         const dados = await getPizzas();
         listaPizzas = Array.isArray(dados) ? dados : [];
-        renderizarVitrine(listaPizzas);
+        filtrarVitrine();
     } catch (error) {
         vitrineContainer.innerHTML = '<p class="error">Erro ao carregar dados da API. Tente novamente em instantes.</p>';
         console.error('Erro ao carregar pizzas:', error);
@@ -144,6 +183,29 @@ const carregarPizzas = async () => {
 
 tabVitrine.addEventListener('click', () => alternarAba('vitrine'));
 tabAdmin.addEventListener('click', () => alternarAba('admin'));
+
+if (filtroVitrine) {
+    filtroVitrine.addEventListener('submit', (e) => {
+        e.preventDefault();
+        filtrarVitrine();
+    });
+}
+
+if (buscaPizza) {
+    buscaPizza.addEventListener('input', filtrarVitrine);
+}
+
+if (filtroCategoria) {
+    filtroCategoria.addEventListener('change', filtrarVitrine);
+}
+
+if (filtroEstoque) {
+    filtroEstoque.addEventListener('change', filtrarVitrine);
+}
+
+if (btnLimparFiltros) {
+    btnLimparFiltros.addEventListener('click', limparFiltros);
+}
 
 if (btnFecharDetalhes) {
     btnFecharDetalhes.addEventListener('click', () => modalDetalhes.close());

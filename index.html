@@ -1,13 +1,286 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Parlor — Catálogo e Estoque</title>
     <link rel="stylesheet" href="./style/global.css">
+    <script src="./app/cloudinary.js" defer></script>
+    <script src="./app/api.js" defer></script>
     <script src="./app/app.js" defer></script>
-    <title>Pizza Parlor</title>
 </head>
 <body>
-    
+    <main>
+        <header class="header">
+            <div class="header-brand">
+                <h1>Pizza Parlor</h1>
+                <p class="subtitle">Gestão de Catálogo e Estoque de Delivery</p>
+            </div>
+            <nav class="nav-tabs" aria-label="Navegação principal">
+                <button type="button" id="tab-vitrine" class="tab-btn active">Vitrine (Catálogo)</button>
+                <button type="button" id="tab-admin" class="tab-btn">Painel Administrativo</button>
+            </nav>
+        </header>
+
+        <section id="sec-vitrine" class="view-section">
+            <form id="filtro-vitrine" class="filter-bar card">
+                <div class="filter-inputs">
+                    <div class="form-group filter-search">
+                        <label for="busca-pizza">Buscar pizza</label>
+                        <input type="text" id="busca-pizza" placeholder="Nome ou ingrediente (ex: mussarela, calabresa)...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filtro-categoria">Categoria</label>
+                        <select id="filtro-categoria">
+                            <option value="">Todas as categorias</option>
+                            <option value="Salgada">Salgada</option>
+                            <option value="Vegetariana">Vegetariana</option>
+                            <option value="Especial">Especial</option>
+                            <option value="Doce">Doce</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filtro-estoque">Disponibilidade</label>
+                        <select id="filtro-estoque">
+                            <option value="">Todos os status</option>
+                            <option value="disponivel">Disponível</option>
+                            <option value="baixo">Estoque baixo</option>
+                            <option value="esgotado">Esgotado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" id="btn-limpar-filtros" class="btn btn-secondary">Limpar Filtros</button>
+                </div>
+            </form>
+
+            <div id="vitrine-container" class="vitrine-grid"></div>
+        </section>
+
+        <section id="sec-admin" class="view-section hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total de Pizzas</span>
+                    <strong id="stat-total" class="stat-value">0</strong>
+                </div>
+                <div class="stat-card stat-disponiveis">
+                    <span class="stat-label">Disponíveis</span>
+                    <strong id="stat-disponiveis" class="stat-value">0</strong>
+                </div>
+                <div class="stat-card stat-baixo">
+                    <span class="stat-label">Estoque Baixo</span>
+                    <strong id="stat-baixo" class="stat-value">0</strong>
+                </div>
+                <div class="stat-card stat-esgotadas">
+                    <span class="stat-label">Esgotadas</span>
+                    <strong id="stat-esgotadas" class="stat-value">0</strong>
+                </div>
+            </div>
+
+            <section id="form-section" class="form-section card">
+                <form id="pizza-form">
+                    <fieldset>
+                        <legend id="form-legend">Cadastro de Pizza</legend>
+
+                        <div class="form-group">
+                            <label for="nome">Nome da Pizza</label>
+                            <input type="text" id="nome" name="nome" placeholder="Ex: Calabresa Especial" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria">Categoria</label>
+                            <select id="categoria" name="categoria" required>
+                                <option value="">Selecione...</option>
+                                <option value="Salgada">Salgada</option>
+                                <option value="Vegetariana">Vegetariana</option>
+                                <option value="Especial">Especial</option>
+                                <option value="Doce">Doce</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tamanho">Tamanho</label>
+                            <select id="tamanho" name="tamanho" required>
+                                <option value="">Selecione...</option>
+                                <option value="Grande (8 fatias)">Grande (8 fatias)</option>
+                                <option value="Média (6 fatias)">Média (6 fatias)</option>
+                                <option value="Broto (4 fatias)">Broto (4 fatias)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="preco">Preço (R$)</label>
+                            <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="49.90" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estoque">Quantidade em Estoque</label>
+                            <input type="number" id="estoque" name="estoque" step="1" min="0" placeholder="10" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imagem">URL da Imagem (Cloudinary)</label>
+                            <input type="url" id="imagem" name="imagem" placeholder="https://res.cloudinary.com/...">
+                        </div>
+
+                        <div class="form-group form-group-full image-upload-group">
+                            <label for="imagem-file">Ou envie uma foto local (upload automático para o Cloudinary)</label>
+                            <div class="image-upload-row">
+                                <input type="file" id="imagem-file" accept="image/*">
+                                <span class="upload-hint">Ao selecionar um arquivo, o link público será preenchido ao salvar.</span>
+                                <img id="preview-imagem" class="preview-thumb hidden" alt="Pré-visualização da pizza">
+                            </div>
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label for="ingredientes">Ingredientes</label>
+                            <textarea id="ingredientes" name="ingredientes" rows="3" placeholder="Ex: Molho de tomate, mussarela, calabresa fatiada..." required></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="reset" id="btn-limpar-form" class="btn btn-secondary">Limpar Campos</button>
+                            <button type="submit" id="btn-salvar" class="btn btn-primary">Salvar Pizza</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </section>
+
+            <section class="table-section card">
+                <div class="table-header">
+                    <h2>Pizzas Cadastradas &amp; Estoque</h2>
+                    <div class="search-container">
+                        <label for="admin-search-input" class="sr-only">Pesquisar pizza</label>
+                        <input type="text" id="admin-search-input" placeholder="Pesquisar pizza por nome ou categoria...">
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Pizza</th>
+                                <th>Categoria</th>
+                                <th>Tamanho</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pizzas-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 Pizza Parlor — Gestão de Catálogo e Estoque.</p>
+        </footer>
+
+        <dialog id="modal-detalhes" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="detalhe-nome">Detalhes da Pizza</h2>
+                    <button type="button" id="btn-fechar-detalhes" class="btn-close" aria-label="Fechar modal">&times;</button>
+                </div>
+                <div class="detalhe-body">
+                    <img id="detalhe-imagem" class="detalhe-img" src="" alt="Foto da pizza">
+                    <div class="detalhe-info">
+                        <div class="detalhe-badges">
+                            <span id="detalhe-categoria" class="badge badge-categoria"></span>
+                            <span id="detalhe-status" class="badge"></span>
+                        </div>
+                        <p class="detalhe-meta"><strong>Tamanho:</strong> <span id="detalhe-tamanho"></span></p>
+                        <p class="detalhe-meta"><strong>Estoque atual:</strong> <span id="detalhe-estoque"></span></p>
+                        <p id="detalhe-preco" class="detalhe-preco"></p>
+                        <div class="detalhe-ingredientes">
+                            <strong>Ingredientes:</strong>
+                            <p id="detalhe-ingredientes"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="btn-ok-detalhes" class="btn btn-primary">Fechar</button>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="modal-editar" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Editar Pizza</h2>
+                    <button type="button" id="btn-fechar-modal" class="btn-close" aria-label="Fechar modal">&times;</button>
+                </div>
+                <form id="form-editar">
+                    <input type="hidden" id="edit-id">
+                    <div class="modal-grid">
+                        <div class="form-group">
+                            <label for="edit-nome">Nome da Pizza</label>
+                            <input type="text" id="edit-nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-categoria">Categoria</label>
+                            <select id="edit-categoria" required>
+                                <option value="Salgada">Salgada</option>
+                                <option value="Vegetariana">Vegetariana</option>
+                                <option value="Especial">Especial</option>
+                                <option value="Doce">Doce</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-tamanho">Tamanho</label>
+                            <select id="edit-tamanho" required>
+                                <option value="Grande (8 fatias)">Grande (8 fatias)</option>
+                                <option value="Média (6 fatias)">Média (6 fatias)</option>
+                                <option value="Broto (4 fatias)">Broto (4 fatias)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-preco">Preço (R$)</label>
+                            <input type="number" id="edit-preco" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-estoque">Quantidade em Estoque</label>
+                            <input type="number" id="edit-estoque" step="1" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-imagem">URL da Imagem (Cloudinary)</label>
+                            <input type="url" id="edit-imagem">
+                        </div>
+                        <div class="form-group form-group-full image-upload-group">
+                            <label for="edit-imagem-file">Ou trocar imagem (upload Cloudinary)</label>
+                            <div class="image-upload-row">
+                                <input type="file" id="edit-imagem-file" accept="image/*">
+                                <img id="edit-preview-imagem" class="preview-thumb hidden" alt="Pré-visualização da pizza">
+                            </div>
+                        </div>
+                        <div class="form-group form-group-full">
+                            <label for="edit-ingredientes">Ingredientes</label>
+                            <textarea id="edit-ingredientes" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="btn-cancelar-modal" class="btn btn-secondary">Cancelar</button>
+                        <button type="submit" id="btn-salvar-modal" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
+
+        <dialog id="delete-confirmation-dialog" class="modal modal-small">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Confirmar Exclusão</h2>
+                </div>
+                <p id="delete-message" class="dialog-message">Tem certeza de que deseja excluir esta pizza?</p>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-delete" class="btn btn-secondary">Cancelar</button>
+                    <button type="button" id="confirm-delete" class="btn btn-danger">Excluir</button>
+                </div>
+            </div>
+        </dialog>
+    </main>
 </body>
 </html>

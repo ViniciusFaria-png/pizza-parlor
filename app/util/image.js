@@ -8,16 +8,15 @@ const IMAGEM_FALLBACK =
             'Sem imagem</text></svg>'
     );
 
+export function ehUrlImagemValida(url) {
+    if (typeof url !== 'string') return false;
+    const limpa = url.trim();
+    return limpa.startsWith('http://') || limpa.startsWith('https://');
+}
 
 export function obterUrlImagem(url) {
-    if (typeof url === 'string') {
-        const limpa = url.trim();
-        if (limpa.startsWith('http://') || limpa.startsWith('https://')) {
-            return limpa;
-        }
-    }
-    return IMAGEM_FALLBACK;
-};
+    return ehUrlImagemValida(url) ? url.trim() : IMAGEM_FALLBACK;
+}
 
 export function configurarImagem(imgElement, url, altText) {
     imgElement.src = obterUrlImagem(url);
@@ -26,4 +25,26 @@ export function configurarImagem(imgElement, url, altText) {
         imgElement.onerror = null;
         imgElement.src = IMAGEM_FALLBACK;
     };
-};
+}
+
+export function configurarPreviewArquivo(fileInput, previewImg) {
+    if (!fileInput || !previewImg) return;
+    fileInput.addEventListener('change', ({ target }) => {
+        const file = target.files && target.files[0];
+        if (file) {
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.classList.remove('hidden');
+        } else {
+            previewImg.classList.add('hidden');
+            previewImg.removeAttribute('src');
+        }
+    });
+}
+
+export async function resolverImagemPizza(fileInput, urlInput) {
+    const file = fileInput.files && fileInput.files[0];
+    if (file) {
+        return uploadParaCloudinary(file);
+    }
+    return urlInput.value.trim();
+}

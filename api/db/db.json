@@ -8,7 +8,7 @@
       "ingredientes": "Molho de tomate, mussarela, calabresa fatiada, cebola roxa e orégano",
       "preco": 49.90,
       "estoque": 12,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616584/calabresa-especial.jpg"
     },
     {
       "id": "2",
@@ -18,7 +18,7 @@
       "ingredientes": "Molho de tomate pelati, mussarela de búfala, manjericão fresco e azeite extra virgem",
       "preco": 52.90,
       "estoque": 10,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616581/margherita-classica.jpg"
     },
     {
       "id": "3",
@@ -28,7 +28,7 @@
       "ingredientes": "Molho de tomate, mussarela, provolone, gorgonzola, parmesão e orégano",
       "preco": 56.90,
       "estoque": 8,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616583/quatro-queijos.jpg"
     },
     {
       "id": "4",
@@ -38,7 +38,7 @@
       "ingredientes": "Molho de tomate, mussarela, frango desfiado temperado, Catupiry original e milho",
       "preco": 54.90,
       "estoque": 15,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616581/frango-catupiry.jpg"
     },
     {
       "id": "5",
@@ -48,7 +48,7 @@
       "ingredientes": "Molho de tomate, mussarela, presunto, ovo cozido, cebola, pimentão e azeitona preta",
       "preco": 55.90,
       "estoque": 9,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616583/portuguesa-tradicional.jpg"
     },
     {
       "id": "6",
@@ -58,7 +58,7 @@
       "ingredientes": "Molho de tomate artesanal, mussarela dupla, pepperoni fatiado e pimenta calabresa",
       "preco": 59.90,
       "estoque": 7,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616581/pepperoni-supreme.jpg"
     },
     {
       "id": "7",
@@ -68,7 +68,7 @@
       "ingredientes": "Molho de tomate, mussarela de búfala, rúcula fresca, tomate seco e lascas de parmesão",
       "preco": 48.90,
       "estoque": 6,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616583/rucula-tomate-seco.jpg"
     },
     {
       "id": "8",
@@ -78,7 +78,7 @@
       "ingredientes": "Molho de tomate, mussarela, presunto de Parma, cream cheese e redução de balsâmico",
       "preco": 64.90,
       "estoque": 5,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616581/parma-cream-cheese.jpg"
     },
     {
       "id": "9",
@@ -88,7 +88,7 @@
       "ingredientes": "Ganache de chocolate meio amargo, morangos frescos fatiados e raspas de chocolate branco",
       "preco": 39.90,
       "estoque": 11,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616580/chocolate-morango.jpg"
     },
     {
       "id": "10",
@@ -98,7 +98,7 @@
       "ingredientes": "Mussarela derretida, goiabada cremosa derretida e toque de canela",
       "preco": 37.90,
       "estoque": 14,
-      "imagem": "link"
+      "imagem": "https://res.cloudinary.com/jlyz9dxn/image/upload/v1794616583/romeu-julieta.jpg"
     }
   ]
 }

@@ -88,7 +88,7 @@ const montarDadosPizza = (campos, imagemUrl) => ({
     categoria: campos.categoria.value,
     tamanho: campos.tamanho.value,
     preco: Number(campos.preco.value),
-    estoque: parseInt(campos.estoque.value, 10),
+    estoque: Number.parseInt(campos.estoque.value, 10),
     imagem: imagemUrl,
     ingredientes: campos.ingredientes.value.trim()
 });
@@ -105,12 +105,14 @@ const abrirModalDetalhes = (pizza) => {
     detalheStatus.textContent = status.texto;
 
     detalheTamanho.textContent = pizza.tamanho || '-';
-    detalheEstoque.textContent =
-        qtd === 0
-            ? '0 unidades (Esgotado)'
-            : qtd === 1
-                ? '1 unidade'
-                : `${qtd} unidades`;
+
+    let textoEstoque = `${qtd} unidades`;
+    if (qtd === 0) {
+        textoEstoque = '0 unidades (Esgotado)';
+    } else if (qtd === 1) {
+        textoEstoque = '1 unidade';
+    }
+    detalheEstoque.textContent = textoEstoque;
 
     detalhePreco.textContent = formatarPreco(pizza.preco);
     detalheIngredientes.textContent = pizza.ingredientes || '-';
@@ -470,7 +472,7 @@ configurarPreviewArquivo(editImagemFile, editPreviewImagem);
 
 formCadastro.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const temArquivo = inputImagemFile.files && inputImagemFile.files[0];
+    const temArquivo = inputImagemFile.files?.[0];
 
     btnSalvar.disabled = true;
     btnSalvar.textContent = temArquivo ? 'Enviando imagem...' : 'Salvando...';
@@ -507,10 +509,10 @@ formCadastro.addEventListener('reset', () => {
     previewImagem.removeAttribute('src');
 });
 
-pizzasTableBody.addEventListener('click', (e) => {
+pizzasTableBody.addEventListener('click', async (e) => {
     const botaoEstoque = e.target.closest('.btn-stock');
     if (botaoEstoque) {
-        atualizarEstoquePizza(
+        await atualizarEstoquePizza(
             botaoEstoque.dataset.id,
             Number(botaoEstoque.dataset.delta),
             botaoEstoque
@@ -525,7 +527,7 @@ pizzasTableBody.addEventListener('click', (e) => {
     if (!id) return;
 
     if (botao.classList.contains('edit')) {
-        abrirModalEditar(id);
+        await abrirModalEditar(id);
     } else if (botao.classList.contains('delete')) {
         pizzaIdParaExcluir = id;
         const pizza = listaPizzas.find((p) => String(p.id) === String(id));
@@ -538,7 +540,7 @@ pizzasTableBody.addEventListener('click', (e) => {
 
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const temArquivo = editImagemFile.files && editImagemFile.files[0];
+    const temArquivo = editImagemFile.files?.[0];
 
     btnSalvarModal.disabled = true;
     btnSalvarModal.textContent = temArquivo ? 'Enviando imagem...' : 'Salvando...';
@@ -602,4 +604,4 @@ fecharModalAoClicarFora(dialogExcluir, () => {
     pizzaIdParaExcluir = null;
 });
 
-carregarPizzas();
+await carregarPizzas();

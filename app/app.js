@@ -1,7 +1,7 @@
 'use strict'
 
 import { formatarPreco } from './util/formataPreco.js'
-import { obterStatusEstoque, calcularResumoEstoque } from './util/estoque.js'
+import { obterStatusEstoque, calcularResumoEstoque, calcularNovoEstoque } from './util/estoque.js'
 import { configurarImagem, ehUrlImagemValida, configurarPreviewArquivo, resolverImagemPizza } from './util/image.js'
 import { normalizarTexto } from './util/normalizarTexto.js'
 import { fecharModalAoClicarFora } from './util/modal.js'
@@ -231,8 +231,28 @@ const atualizarResumoEstoque = () => {
     statEsgotadas.textContent = resumo.esgotadas;
 };
 
+const ROTULO_ESTOQUE_TABELA = {
+    esgotado: 'Esgotado',
+    baixo: 'Baixo',
+    disponivel: 'Disponível'
+};
+
+const criarBotaoEstoque = (id, delta, texto, title, ariaLabel, disabled = false) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-stock';
+    btn.dataset.id = id;
+    btn.dataset.delta = String(delta);
+    btn.title = title;
+    btn.setAttribute('aria-label', ariaLabel);
+    btn.textContent = texto;
+    btn.disabled = disabled;
+    return btn;
+};
+
 const criarLinhaAdmin = (pizza) => {
-    const status = obterStatusEstoque(pizza.estoque);
+    const qtdEstoque = Number(pizza.estoque ?? 0);
+    const status = obterStatusEstoque(qtdEstoque);
 
     const tr = document.createElement('tr');
 
@@ -261,10 +281,36 @@ const criarLinhaAdmin = (pizza) => {
     tdPreco.textContent = formatarPreco(pizza.preco);
 
     const tdEstoque = document.createElement('td');
+    const stockControl = document.createElement('div');
+    stockControl.className = 'stock-control';
+
+    const btnBaixa = criarBotaoEstoque(
+        pizza.id,
+        -1,
+        '-',
+        'Dar baixa (-1)',
+        `Dar baixa no estoque de ${pizza.nome || 'pizza'}`,
+        qtdEstoque <= 0
+    );
+
+    const stockQty = document.createElement('span');
+    stockQty.className = 'stock-qty';
+    stockQty.textContent = qtdEstoque;
+
+    const btnEntrada = criarBotaoEstoque(
+        pizza.id,
+        1,
+        '+',
+        'Dar entrada (+1)',
+        `Dar entrada no estoque de ${pizza.nome || 'pizza'}`
+    );
+
     const badgeStatus = document.createElement('span');
     badgeStatus.className = `badge ${status.classe}`;
-    badgeStatus.textContent = status.texto;
-    tdEstoque.appendChild(badgeStatus);
+    badgeStatus.textContent = ROTULO_ESTOQUE_TABELA[status.tipo];
+
+    stockControl.append(btnBaixa, stockQty, btnEntrada, badgeStatus);
+    tdEstoque.appendChild(stockControl);
 
     const tdAcoes = document.createElement('td');
     const actionButtons = document.createElement('div');
@@ -376,6 +422,33 @@ const executarExclusao = async (id) => {
     }
 };
 
+const atualizarEstoquePizza = async (id, delta, botao) => {
+    const pizza = listaPizzas.find((p) => String(p.id) === String(id));
+    if (!pizza) return;
+
+    const estoqueAtual = Number(pizza.estoque ?? 0);
+    const novoEstoque = calcularNovoEstoque(estoqueAtual, delta);
+    if (novoEstoque === estoqueAtual) return;
+
+    const controle = botao.closest('.stock-control');
+    const botoes = controle ? controle.querySelectorAll('.btn-stock') : [botao];
+    botoes.forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    try {
+        const atualizada = await patchPizza(pizza.id, { estoque: novoEstoque });
+        pizza.estoque = atualizada.estoque ?? novoEstoque;
+        filtrarVitrine();
+        atualizarResumoEstoque();
+        filtrarAdmin();
+    } catch (error) {
+        alert('Erro ao atualizar estoque da pizza.');
+        console.error('Erro ao atualizar estoque:', error);
+        filtrarAdmin();
+    }
+};
+
 tabVitrine.addEventListener('click', () => alternarAba('vitrine'));
 tabAdmin.addEventListener('click', () => alternarAba('admin'));
 
@@ -435,6 +508,16 @@ formCadastro.addEventListener('reset', () => {
 });
 
 pizzasTableBody.addEventListener('click', (e) => {
+    const botaoEstoque = e.target.closest('.btn-stock');
+    if (botaoEstoque) {
+        atualizarEstoquePizza(
+            botaoEstoque.dataset.id,
+            Number(botaoEstoque.dataset.delta),
+            botaoEstoque
+        );
+        return;
+    }
+
     const botao = e.target.closest('.btn-action');
     if (!botao) return;
 

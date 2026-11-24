@@ -32,3 +32,8 @@ export function calcularResumoEstoque(pizzas) {
         esgotadas
     };
 }
+
+export function calcularNovoEstoque(estoqueAtual, delta) {
+    const atual = Number(estoqueAtual ?? 0);
+    return Math.max(0, atual + delta);
+}

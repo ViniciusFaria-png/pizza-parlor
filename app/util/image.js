@@ -30,7 +30,7 @@ export function configurarImagem(imgElement, url, altText) {
 export function configurarPreviewArquivo(fileInput, previewImg) {
     if (!fileInput || !previewImg) return;
     fileInput.addEventListener('change', ({ target }) => {
-        const file = target.files && target.files[0];
+        const file = target.files?.[0];
         if (file) {
             previewImg.src = URL.createObjectURL(file);
             previewImg.classList.remove('hidden');
@@ -42,7 +42,7 @@ export function configurarPreviewArquivo(fileInput, previewImg) {
 }
 
 export async function resolverImagemPizza(fileInput, urlInput) {
-    const file = fileInput.files && fileInput.files[0];
+    const file = fileInput.files?.[0];
     if (file) {
         return uploadParaCloudinary(file);
     }
